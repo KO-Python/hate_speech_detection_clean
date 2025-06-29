@@ -25,6 +25,10 @@ model = CategoryOnlyBERT(pretrained_model_name="klue/bert-base", num_category_la
 model.load_state_dict(torch.load("hate_speech_model.pt", map_location='cpu'))
 model.eval()
 
+# 장치 설정 (CUDA가 사용 가능한 경우 GPU 사용)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)  # 모델을 해당 디바이스로 이동
+
 # Streamlit UI
 st.title("🗨️ 혐오 표현 탐지기")
 st.write("온라인 커뮤니티나 소셜미디어에서 접한 혐오 표현이 의심되는 문장을 입력해보세요!")
@@ -40,15 +44,14 @@ if st.button("분석하기"):
         # 입력된 텍스트를 토크나이저로 처리
         inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
 
+        # 텐서를 디바이스로 이동
+        input_ids = inputs['input_ids'].to(device)
+        attention_mask = inputs['attention_mask'].to(device)
+
         # 예측 수행
         with torch.no_grad():
-            # 모델에 입력
-            category_logits = model(**inputs)
-
-            # 예측된 카테고리 인덱스 추출
+            category_logits = model(input_ids=input_ids, attention_mask=attention_mask)
             pred_category_idx = torch.argmax(category_logits, dim=1).item()
-
-            # 라벨 인코딩을 통해 카테고리 추출
             pred_category = category_encoder.inverse_transform([pred_category_idx])[0]
 
         # 예측된 카테고리 결과 출력
