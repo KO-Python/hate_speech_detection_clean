@@ -42,8 +42,13 @@ if st.button("분석하기"):
 
         # 예측 수행
         with torch.no_grad():
+            # 모델에 입력
             category_logits = model(**inputs)
+
+            # 예측된 카테고리 인덱스 추출
             pred_category_idx = torch.argmax(category_logits, dim=1).item()
+
+            # 라벨 인코딩을 통해 카테고리 추출
             pred_category = category_encoder.inverse_transform([pred_category_idx])[0]
 
         # 예측된 카테고리 결과 출력
