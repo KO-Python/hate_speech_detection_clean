@@ -1,4 +1,4 @@
-transformers==4.40.1
-torch
+transformers==4.35.2
+torch==2.2.2
 streamlit
 scikit-learn
